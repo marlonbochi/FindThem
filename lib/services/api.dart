@@ -1,11 +1,24 @@
 import 'dart:async';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
-Future<String> api(String orgid) async {
-  http.Response response = await http.get(
-    Uri.encodeFull("https://www.example.com/api"),
-  );
-  print("Respone ${response.body.toString()}");
-  //Returns 'true' or 'false' as a String
-  return response.body;
+class API {
+
+    Future<dynamic> signIn(String email, String password) async {
+
+      FormData formData = new FormData.fromMap({
+        "login": email,
+        "password": password
+      });
+
+      try {
+        var response = await Dio().post(
+          "https://findthem20190819101129.azurewebsites.net/api/login/signIn",
+          data: formData
+        );
+        
+        return response.data;
+      } catch (e) {
+        print(e);
+      }
+    }
 }
