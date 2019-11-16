@@ -24,11 +24,16 @@ class _LoginState extends State<Login> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              new Container(
+              padding: new EdgeInsets.only(bottom: 25.0),
+                child: new Image(image: AssetImage('assets/icon.png'), alignment: Alignment.center, width: 100, height: 100 ),
+              ),
+              Divider(),
               TextField(
                 autofocus: true,
                 controller: emailTextField,
                 keyboardType: TextInputType.emailAddress,
-                style: TextStyle(color: Colors.blue, fontSize: 30),
+                style: TextStyle(color: Colors.blue, fontSize: 20),
                 decoration: InputDecoration(
                   labelText:"Email",
                   labelStyle: TextStyle(color: Colors.black),
@@ -40,23 +45,26 @@ class _LoginState extends State<Login> {
                 controller: passwordTextField,
                 obscureText: true,
                 keyboardType: TextInputType.text,
-                style: TextStyle(color: Colors.blue, fontSize: 30),
+                style: TextStyle(color: Colors.blue, fontSize: 20),
                 decoration: InputDecoration(
                   labelText:"Password",
                   labelStyle: TextStyle(color: Colors.black),
                 )
               ),
               Divider(),
-              ButtonTheme(
-                height: 60.0,
-                child: RaisedButton(
-                  onPressed: onButtonPress,
-                  shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
-                  child: Text(
-                    "Enviar",
-                    style: TextStyle(color: Colors.white, fontSize: 30),
+              Container(
+                margin: new EdgeInsets.only(top: 25),
+                child: ButtonTheme(
+                  height: 40.0,
+                  child: RaisedButton(
+                    onPressed: onButtonPress,
+                    shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(15.0)),
+                    child: Text(
+                      "Enviar",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                    color:Colors.blue,
                   ),
-                  color:Colors.blue,
                 ),
               ),
             ],
