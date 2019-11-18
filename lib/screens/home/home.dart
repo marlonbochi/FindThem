@@ -1,4 +1,9 @@
+import 'dart:math';
+
+import 'package:find_them/models/provider.dart';
+import 'package:find_them/screens/request/request.dart';
 import 'package:find_them/services/common.dart';
+import 'package:find_them/services/providerService.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -19,6 +24,7 @@ class _HomeState extends State<Home> {
   static LatLng _initialPosition;
   final Set<Marker> _markers = {};
   static  LatLng _lastMapPosition = _initialPosition;
+  final int idProvider = 0;
 
   void initState() {
     super.initState();
@@ -26,17 +32,35 @@ class _HomeState extends State<Home> {
 
     var common = new Common();
 
-    common.getPreferences("token").then((response) {
-      print(response);
-      if (response == null || response.isEmpty){
+    common.getPreferences("token").then((toke_response) {
+      if (toke_response == null || toke_response.isEmpty){
 
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => Login()),
         );
       } else {
-        setState(() {
-          token: response;
+
+        common.getPreferences("token_expiration").then((expiration_response) {
+          var dateNow = new DateTime.now();
+          var dateExpiration = DateTime.parse(expiration_response);
+
+          if (dateExpiration.isBefore(dateNow)) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Login()),
+            );
+          } else {
+            token = toke_response;
+
+            setState(() {
+              token: toke_response;
+              token_expiration: expiration_response;
+            });
+
+            getProviders();
+          }
+
         });
       }
     });
@@ -48,10 +72,8 @@ class _HomeState extends State<Home> {
     List<Placemark> placemark = await Geolocator().placemarkFromCoordinates(position.latitude, position.longitude);
     setState(() {
       _initialPosition = LatLng(position.latitude, position.longitude);
-      print('${placemark[0].name}');
     });
   }
-
 
   _onMapCreated(GoogleMapController controller) {
     setState(() {
@@ -73,23 +95,58 @@ class _HomeState extends State<Home> {
     _lastMapPosition = position.target;
   }
 
-  _onAddMarkerButtonPressed() {
-    setState(() {
-      _markers.add(
-          Marker(
-              markerId: MarkerId(_lastMapPosition.toString()),
-              position: _lastMapPosition,
-              infoWindow: InfoWindow(
-                  title: "Pizza Parlour",
-                  snippet: "This is a snippet",
-                  onTap: (){
-                  }
-              ),
-              onTap: (){
-              },
+  void getProviders() {
 
-              icon: BitmapDescriptor.defaultMarker));
+    var providerService = new ProviderService();
+
+    providerService.findAll(token).then((providers) {
+      var markersProvider = convertProviderToMarkers(providers);
+
+      setState(() {
+        _markers.addAll(markersProvider);
+      });
     });
+  }
+
+  convertProviderToMarkers(List<Provider> providers) {
+    List<Marker> markers = new List<Marker>();
+
+    var random = new Random();
+
+    providers.forEach((provider) {
+
+      if (provider.latitude != null && provider.longitude != null) {
+        LatLng position = new LatLng(provider.latitude, provider.longitude);
+
+        int next(int min, int max) => min + random.nextInt(max - min);
+
+        var marker = Marker(
+            markerId: MarkerId(next.toString()),
+            position: position,
+            infoWindow: InfoWindow(
+                title: provider.name,
+                snippet: "Clique aqui para selecionar",
+                onTap: (){
+                  setState(() {
+                    idProvider: provider.id;
+                  });
+                  print("cliquei 2 " + provider.id.toString());
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Request(token: token, providerID: provider.id)),
+                  );
+                }
+            ),
+
+            icon: BitmapDescriptor.defaultMarker
+        );
+
+        markers.add(marker);
+      }
+    });
+
+    return markers;
   }
 
   Widget _buildMap() {
@@ -112,7 +169,7 @@ class _HomeState extends State<Home> {
           mapType: _currentMapType,
           initialCameraPosition: CameraPosition(
             target: _initialPosition,
-            zoom: 16.0,
+            zoom: 14.0,
           ),
           onMapCreated: _onMapCreated,
           zoomGesturesEnabled: true,
@@ -126,14 +183,43 @@ class _HomeState extends State<Home> {
     );
   }
 
+  void _logout() {
+    var common = new Common();
+
+    common.removePreferences("token").then((value) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Login()),
+      );
+    });
+    common.removePreferences("token_expiration");
+  }
+
   @override
     Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-            title: Text("Find Them")
+            title: Text("Find Them"),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.exit_to_app),
+                onPressed: () {
+                  _logout();
+                },
+              )
+            ],
         ),
-        body: _buildMap()
+        body: _buildMap(),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            // Add your onPressed code here!
+          },
+          label: Text("Filtrar"),
+          icon: Icon(Icons.search),
+          backgroundColor: Colors.blue
+        ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat
       ),
     );
   }
