@@ -130,7 +130,6 @@ class _HomeState extends State<Home> {
                   setState(() {
                     idProvider: provider.id;
                   });
-                  print("cliquei 2 " + provider.id.toString());
 
                   Navigator.push(
                     context,
