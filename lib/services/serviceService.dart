@@ -13,14 +13,14 @@ class ServiceService {
 
     try {
       Response response = await Dio().get(
-          "https://findthem20190819101129.azurewebsites.net/api/services/findAll/" + providerID.toString(),
+          "https://findthem20190819101129.azurewebsites.net/api/service/findAll/" + providerID.toString(),
           options: new Options(
               headers: { "Authorization" : "Bearer " + token}
           )
       );
 
-      response.data.forEach((Service) {
-        services.add(Service.fromJson(Service));
+      response.data.forEach((service) {
+        services.add(Service.fromJson(service));
       });
 
       return services;

@@ -23,9 +23,16 @@ class _RequestState extends State<Request> {
   final providerText = TextEditingController();
   final clientText = TextEditingController();
   final serviceText = TextEditingController();
-  List<DropdownMenuItem<String>> _dropDownMenuItems;
+  final valueController = TextEditingController();
+  final materialsController = TextEditingController();
+  final descriptionController = TextEditingController();
 
+
+  List<DropdownMenuItem<String>> _dropDownMenuItems;
   List<Service> services;
+  Service selectedService;
+
+  String _currentService;
 
   void initState() {
 
@@ -35,8 +42,7 @@ class _RequestState extends State<Request> {
 
     clientServive.get(widget.token).then((responseClient){
       client = responseClient;
-print(client.name);
-      clientText.text = client.name;
+      clientText.text = client.user.name;
     });
 
     providerService.get(widget.token, widget.providerID).then((responseProvider){
@@ -46,11 +52,17 @@ print(client.name);
     });
 
     serviceService.findAll(widget.token, widget.providerID).then((responseService){
-      List<Service> services = responseService;
+      services = responseService;
 
 //      providerText.text = provider.name;
 
       List<DropdownMenuItem<String>> items = new List();
+
+      items.add(new DropdownMenuItem(
+          value: "",
+          child: new Text("Selecione o serviço")
+      ));
+
       for (Service service in services) {
         // here we are creating the drop down menu items, you can customize the item right here
         // but I'll just use a simple text for this
@@ -59,21 +71,48 @@ print(client.name);
             child: new Text(service.name)
         ));
       }
-      _dropDownMenuItems = items;
+
+      setState(() {
+        _dropDownMenuItems = items.toList();
+        _currentService = _dropDownMenuItems[0].value;
+      });
     });
+  }
+
+  void changedDropDownItem(String optionSelected) {
+
+    if (optionSelected != "") {
+      for (Service service in services) {
+        if (service.id.toString() == optionSelected) selectedService = service;
+      }
+
+      setState(() {
+        _currentService = optionSelected;
+      });
+
+      descriptionController.text = selectedService.description;
+      materialsController.text = selectedService.materials;
+      valueController.text = 'R\$ ' + selectedService.price.toString().replaceAll(".", ",");
+    }
+  }
+
+  void createRequest() {
+
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: Scaffold(
+          resizeToAvoidBottomInset: false,
           appBar: AppBar(
             title: Text("Solicitar serviço"),
             leading: IconButton(icon:Icon(Icons.arrow_back),
               onPressed:() => Navigator.pop(context, false),
             ),
         ),
-          body: Padding(
+          body: SingleChildScrollView(
             padding: const EdgeInsets.all(10.0),
             child: Center(
                 child: Column(
@@ -85,21 +124,54 @@ print(client.name);
                     ),
                     Container(
                       padding: EdgeInsets.only(bottom: 25.0),
-                      child: TextField(controller: clientText,enabled: false),
+                      child: TextField(controller: clientText,enabled: false, keyboardType: TextInputType.multiline, maxLines: null),
                     ),
                     Text("Prestador de serviço"),
                     Container(
                       padding: EdgeInsets.only(bottom: 25.0),
-                      child: TextField(controller: providerText, enabled: false),
+                      child: TextField(controller: providerText, enabled: false, keyboardType: TextInputType.multiline, maxLines: null),
                     ),
                     Text("Serviço"),
                     Container(
                       padding: EdgeInsets.only(bottom: 25.0),
                       child: DropdownButton<String>(
-                          value: "",
+                          value: _currentService,
                           items: _dropDownMenuItems,
                           onChanged: changedDropDownItem,
-                        )
+                          isExpanded: true,
+                        ),
+                    ),
+                    Text("Descrição:"),
+                    Container(
+                      padding: EdgeInsets.only(bottom: 25.0),
+                      child: TextField(controller: descriptionController, enabled: false, keyboardType: TextInputType.multiline, maxLines: null),
+                    ),
+                    Text("Materiais:"),
+                    Container(
+                      padding: EdgeInsets.only(bottom: 25.0),
+                      child: TextField(controller: materialsController, enabled: false, keyboardType: TextInputType.multiline, maxLines: null),
+                    ),
+                    Text("Valor:"),
+                    Container(
+                      padding: EdgeInsets.only(bottom: 25.0),
+                      child: TextField(controller: valueController, enabled: false),
+                    ),
+                    Container(
+                      margin: new EdgeInsets.only(top: 25),
+                      child: Center(
+                        child: ButtonTheme(
+                          height: 40.0,
+                          child: RaisedButton(
+                              onPressed: createRequest,
+                              shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(15.0)),
+                              child: Text(
+                                "Criar requisição",
+                                style: TextStyle(color: Colors.white, fontSize: 14),
+                              ),
+                              color:Colors.blue,
+                          ),
+                        ),
+                       ),
                     ),
                   ],
                 ),
@@ -107,10 +179,5 @@ print(client.name);
           ),
       ),
     );
-  }
-
-  void changedDropDownItem(String selectedCity) {
-    print("Selected city $selectedCity, we are going to refresh the UI");
-
   }
 }
