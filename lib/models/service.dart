@@ -1,5 +1,9 @@
-import 'package:find_them/models/user.dart';
+import 'package:find_them/models/provider.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+part 'service.g.dart';
+
+@JsonSerializable()
 class Service {
 
   int id;
@@ -8,7 +12,7 @@ class Service {
   double price;
   String description;
   String materials;
-  int providerID;
+  Provider provider;
 
   Service(
       this.id,
@@ -17,16 +21,10 @@ class Service {
       this.price,
       this.description,
       this.materials,
-      this.providerID,
+      this.provider,
       );
 
-  Service.fromJson(Map<String, dynamic> json) {
-    this.id = json["id"];
-    this.name = json["name"];
-    this.timeExecution = json["timeExecution"];
-    this.price = json["price"];
-    this.description = json["description"];
-    this.materials = json["materials"];
-    this.providerID = json["providerID"];
-  }
+  factory Service.fromJson(Map<String, dynamic> json) => _$ServiceFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ServiceToJson(this);
 }

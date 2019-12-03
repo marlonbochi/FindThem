@@ -1,4 +1,9 @@
 import 'package:find_them/models/user.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'provider.g.dart';
+
+@JsonSerializable()
 
 class Provider {
 
@@ -34,20 +39,7 @@ class Provider {
       this.longitude
       );
 
-  Provider.fromJson(Map<String, dynamic> json) {
-    this.id = json["id"];
-    this.name = json["name"];
-    this.photo = json["photo"];
-    this.rateAVG = json["rateAVG"];
-    this.user = User.fromJson(json["user"]);
-    this.city = json["city"];
-    this.neighborhood = json["neighborhood"];
-    this.address = json["address"];
-    this.state = json["state"];
-    this.cep = json["cep"];
-    this.number = json["number"];
-    this.complement = json["complement"];
-    this.latitude = json["latitude"];
-    this.longitude = json["longitude"];
-  }
+  factory Provider.fromJson(Map<String, dynamic> json) => _$ProviderFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ProviderToJson(this);
 }

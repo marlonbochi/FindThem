@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:find_them/models/request.dart';
 
@@ -9,17 +7,25 @@ class RequestService {
 
   Future<bool> create(String token, Request request) async {
 
-//    var jsonEncodeRequest = jsonEncode(request);
-//    try {
-//      var response = await Dio().post(
-//          "https://findthem20190819101129.azurewebsites.net/api/request/create",
-//          data: jsonEncodeRequest
-//      );
-//
-//      return response.data;
-//    } catch (e) {
-//      print(e);
-//    }
+    var requestConverted = request.toJson();
+
+    try {
+      var response = await Dio().post(
+          "https://findthem20190819101129.azurewebsites.net/api/request/create",
+          data: requestConverted,
+          options: new Options(
+              headers: { "Authorization" : "Bearer " + token}
+          )
+      );
+
+      if (response.data.sucess) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print(e);
+    }
 
     return true;
   }
@@ -44,4 +50,5 @@ class RequestService {
       print(e);
     }
   }
+
 }

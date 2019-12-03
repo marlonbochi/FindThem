@@ -1,8 +1,11 @@
 import 'package:find_them/models/client.dart';
 import 'package:find_them/models/provider.dart';
 import 'package:find_them/models/service.dart';
-import 'package:find_them/models/user.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+part 'request.g.dart';
+
+@JsonSerializable()
 class Request {
 
   int id;
@@ -12,7 +15,7 @@ class Request {
   DateTime dateStart;
   DateTime dateEnd;
   String description;
-  String cep;
+  int cep;
   String state;
   String address;
   String numberAddress;
@@ -22,6 +25,8 @@ class Request {
   double latitude;
   double longitude;
   String status;
+  double value;
+  bool enabled;
 
   Request(
       this.id,
@@ -40,26 +45,12 @@ class Request {
       this.city,
       this.latitude,
       this.longitude,
-      this.status
+      this.status,
+      this.value,
+      this.enabled
       );
 
-  Request.fromJson(Map<String, dynamic> json) {
-    this.id = json["id"];
-    this.client = Client.fromJson(json["client"]);
-    this.provider = Provider.fromJson(json["provider"]);
-    this.service = Service.fromJson(json["service"]);
-    this.dateStart = json["dateStart"];
-    this.dateEnd = json["dateEnd"];
-    this.description = json["description"];
-    this.address = json["address"];
-    this.state = json["state"];
-    this.cep = json["cep"];
-    this.numberAddress = json["numberAddress"];
-    this.complementAddress = json["complementAddress"];
-    this.neighborhoodAddress = json["neighborhoodAddress"];
-    this.city = json["city"];
-    this.latitude = json["latitude"];
-    this.longitude = json["longitude"];
-    this.status = json["status"];
-  }
+  factory Request.fromJson(Map<String, dynamic> json) => _$RequestFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RequestToJson(this);
 }

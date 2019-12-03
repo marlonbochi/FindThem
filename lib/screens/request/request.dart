@@ -121,7 +121,7 @@ class _RequestState extends State<Request> {
       });
 
       descriptionController.text = selectedService.description;
-      valueController.text = 'R\$ ' + selectedService.price.toString().replaceAll(".", ",");
+      valueController.text = selectedService.price.toString();
     }
   }
 
@@ -148,13 +148,15 @@ class _RequestState extends State<Request> {
         DateTime.parse(dateStartController.text),
         DateTime.parse(dateEndController.text),
         descriptionController.text,
-        cepController.text,
+        int.parse(cepController.text),
         addressController.text,
         numberAddressController.text,
         complementAddressController.text,
         neighborhoodAddressController.text,
         stateController.text,
-        cityController.text, 0, 0, "A");
+        cityController.text, 0, 0, "A",
+        double.parse(valueController.text),
+        true);
 
     var serviceRequest = new RequestService();
 
@@ -284,7 +286,7 @@ class _RequestState extends State<Request> {
                     Text("Número:"),
                     Container(
                       padding: EdgeInsets.only(bottom: 25.0),
-                      child: TextField(controller: numberAddressController, enabled: true),
+                      child: TextField(controller: numberAddressController, enabled: true, keyboardType: TextInputType.number),
                     ),
                     Text("Complemento:"),
                     Container(

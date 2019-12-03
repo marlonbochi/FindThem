@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:find_them/screens/home/home.dart';
 import 'package:find_them/screens/login/login.dart';
 import 'package:find_them/services/common.dart';
@@ -5,10 +7,8 @@ import 'package:find_them/services/requestService.dart';
 import 'package:flutter/material.dart';
 
 class ListRequest extends StatefulWidget {
-  final int providerID;
-  final String token;
 
-  const ListRequest({Key key, this.token, this.providerID}): super(key: key);
+  const ListRequest({Key key}): super(key: key);
 
   @override
   _ListRequestState createState() => _ListRequestState();
@@ -18,6 +18,8 @@ class _ListRequestState extends State<ListRequest> {
 
   String token = "";
   String nameUser = "";
+  List<Widget> listCards = new List<Widget>();
+
   void initState() {
 
     var common = new Common();
@@ -33,6 +35,38 @@ class _ListRequestState extends State<ListRequest> {
 
           setState(() {
             token = tokeResponse;
+          });
+
+          var serviceRequest = new RequestService();
+          List<Widget> newListCards = new List<Widget>();
+
+          serviceRequest.findAll(token).then((requests) {
+
+            if (requests != null) {
+              requests.forEach((request) {
+                newListCards.add(
+                    Card(
+                      child: ListTile(
+                        title: Text(request.service.name),
+                        onTap: () {
+
+                          Navigator.push(context, MaterialPageRoute<Null>(
+                              builder: (BuildContext context) {
+                                return Rate(token: token, requestID: request.id);
+                              },
+                              fullscreenDialog: true,
+                          ));
+                        },
+                      ),
+
+                    )
+                );
+              });
+
+              setState(() {
+                listCards = newListCards;
+              });
+            }
           });
         });
 
@@ -55,33 +89,6 @@ class _ListRequestState extends State<ListRequest> {
       );
     });
     common.removePreferences("token_expiration");
-  }
-
-  List<Widget> mountRequests() {
-
-    var listCards = new List<Widget>();
-    var serviceRequest = new RequestService();
-
-
-    serviceRequest.findAll(token).then((requests) {
-
-      requests.forEach((request) {
-        print(request);
-        listCards.add(
-            Card(
-                child: ListTile(
-                    title: Text(request.service.name),
-                  onTap: () {
-
-                  },
-                ),
-
-            )
-        );
-      });
-    });
-
-    return listCards;
   }
 
   @override
@@ -125,7 +132,7 @@ class _ListRequestState extends State<ListRequest> {
           ), // Populate the Drawer in the next step.
         ),
         appBar: AppBar(
-          title: Text("Find Them"),
+          title: Text("Minhas solicitações"),
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.exit_to_app),
@@ -138,11 +145,36 @@ class _ListRequestState extends State<ListRequest> {
         body: Container(
           child: Center(
             child: ListView(
-                children: mountRequests(),
+                children: listCards,
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class Rate extends StatelessWidget {
+  final int requestID;
+  final String token;
+
+  const Rate({Key key, this.token, this.requestID}): super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: Text("Avaliar"),
+            actions: <Widget>[
+              new IconButton(
+                icon: new Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(null),
+              ),
+            ],
+          ),
+          body: Text("RATE"),
+        )
     );
   }
 }

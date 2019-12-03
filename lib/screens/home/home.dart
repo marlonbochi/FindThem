@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:find_them/models/provider.dart';
@@ -22,9 +23,9 @@ class _HomeState extends State<Home> {
 
   String token = "";
   String nameUser = "";
-  Completer<GoogleMapController> mapController;
+  GoogleMapController mapController;
   static LatLng _initialPosition;
-  final Set<Marker> _markers = {};
+  final List<Marker> allMarkers = [];
   static  LatLng _lastMapPosition = _initialPosition;
   final int idProvider = 0;
   MapType _currentMapType = MapType.normal;
@@ -72,7 +73,7 @@ class _HomeState extends State<Home> {
 
   _onMapCreated(GoogleMapController controller) {
     setState(() {
-      mapController.complete(controller);
+      mapController = controller;
     });
   }
 
@@ -89,28 +90,12 @@ class _HomeState extends State<Home> {
     _lastMapPosition = position.target;
   }
 
-  void getProviders() {
-
-    var providerService = new ProviderService();
-
-    providerService.findAll(token).then((providers) {
-      var markersProvider = convertProviderToMarkers(providers);
-
-
-      setState(() {
-        _markers.addAll(markersProvider);
-      });
-    });
-  }
-
-  convertProviderToMarkers(List<Provider> providers) {
+  List<Marker> convertProviderToMarkers(List<Provider> providers) {
     List<Marker> markers = new List<Marker>();
 
     var random = new Random();
 
     providers.forEach((provider) {
-
-      print(provider);
 
       if (provider.latitude != null && provider.longitude != null) {
         LatLng position = new LatLng(provider.latitude, provider.longitude);
@@ -137,8 +122,20 @@ class _HomeState extends State<Home> {
         markers.add(marker);
       }
     });
-
     return markers;
+  }
+
+  void getProviders() {
+
+    var providerService = new ProviderService();
+
+    providerService.findAll(token).then((providers) {
+      List<Marker> markersProvider = convertProviderToMarkers(providers);
+
+      setState(() {
+        allMarkers.addAll(markersProvider);
+      });
+    });
   }
 
   Widget _buildMap() {
@@ -157,7 +154,7 @@ class _HomeState extends State<Home> {
     return Container(
       child: Stack(children: <Widget>[
         GoogleMap(
-          markers: _markers,
+          markers: Set.from(allMarkers),
           mapType: _currentMapType,
           initialCameraPosition: CameraPosition(
             target: _initialPosition,
