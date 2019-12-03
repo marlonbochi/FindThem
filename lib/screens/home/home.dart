@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:find_them/models/provider.dart';
+import 'package:find_them/screens/request/list.dart';
 import 'package:find_them/screens/request/request.dart';
 import 'package:find_them/services/common.dart';
 import 'package:find_them/services/providerService.dart';
@@ -20,11 +21,13 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   String token = "";
+  String nameUser = "";
   Completer<GoogleMapController> mapController;
   static LatLng _initialPosition;
   final Set<Marker> _markers = {};
   static  LatLng _lastMapPosition = _initialPosition;
   final int idProvider = 0;
+  MapType _currentMapType = MapType.normal;
 
   void initState() {
     super.initState();
@@ -32,35 +35,27 @@ class _HomeState extends State<Home> {
 
     var common = new Common();
 
-    common.getPreferences("token").then((toke_response) {
-      if (toke_response == null || toke_response.isEmpty){
+    common.testToken().then( (validated) {
 
+      if (!validated) {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => Login()),
         );
       } else {
+        common.getPreferences("token").then((tokeResponse) {
 
-        common.getPreferences("token_expiration").then((expiration_response) {
-          var dateNow = new DateTime.now();
-          var dateExpiration = DateTime.parse(expiration_response);
+          setState(() {
+            token = tokeResponse;
+          });
 
-          if (dateExpiration.isBefore(dateNow)) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => Login()),
-            );
-          } else {
-            token = toke_response;
+          getProviders();
+        });
 
-            setState(() {
-              token: toke_response;
-              token_expiration: expiration_response;
-            });
-
-            getProviders();
-          }
-
+        common.getPreferences("nameUser").then((name){
+          setState(() {
+            nameUser = name;
+          });
         });
       }
     });
@@ -81,7 +76,6 @@ class _HomeState extends State<Home> {
     });
   }
 
-  MapType _currentMapType = MapType.normal;
 
   void _onMapTypeButtonPressed() {
     setState(() {
@@ -102,6 +96,7 @@ class _HomeState extends State<Home> {
     providerService.findAll(token).then((providers) {
       var markersProvider = convertProviderToMarkers(providers);
 
+
       setState(() {
         _markers.addAll(markersProvider);
       });
@@ -115,6 +110,8 @@ class _HomeState extends State<Home> {
 
     providers.forEach((provider) {
 
+      print(provider);
+
       if (provider.latitude != null && provider.longitude != null) {
         LatLng position = new LatLng(provider.latitude, provider.longitude);
 
@@ -127,10 +124,6 @@ class _HomeState extends State<Home> {
                 title: provider.name,
                 snippet: "Clique aqui para selecionar",
                 onTap: (){
-                  setState(() {
-                    idProvider: provider.id;
-                  });
-
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => Request(token: token, providerID: provider.id)),
@@ -198,6 +191,42 @@ class _HomeState extends State<Home> {
     Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        drawer: Drawer(
+            child: ListView(
+              // Important: Remove any padding from the ListView.
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                DrawerHeader(
+                  child: Text(
+                    "Olá " + nameUser,
+                    style: TextStyle(color: Colors.white),
+                      textAlign: TextAlign.center
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                  ),
+                ),
+                ListTile(
+                  title: Text('Procurar prestadores de serviço'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Home()),
+                    );
+                  },
+                ),
+                ListTile(
+                  title: Text('Minhas solicitações de serviço'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ListRequest()),
+                    );
+                  },
+                ),
+              ],
+            ), // Populate the Drawer in the next step.
+          ),
         appBar: AppBar(
             title: Text("Find Them"),
             actions: <Widget>[

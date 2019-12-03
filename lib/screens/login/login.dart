@@ -1,4 +1,5 @@
 import 'package:find_them/screens/home/home.dart';
+import 'package:find_them/services/clientService.dart';
 import 'package:flutter/material.dart';
 import 'package:find_them/services/api.dart';
 import 'package:find_them/services/common.dart';
@@ -81,13 +82,22 @@ class _LoginState extends State<Login> {
     api.signIn(emailTextField.text, passwordTextField.text).then((response) {
       var common = new Common();
 
-      common.setPreferences("token", response["token"]);
+      var token = response["token"];
+      common.setPreferences("token", token);
       common.setPreferences("token_expiration", response["expiration"]);
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Home()),
-      );
+      var clientService = new ClientService();
+
+      clientService.get(token).then((responseClient){
+        print(responseClient);
+        common.setPreferences("idUser", responseClient.user.id);
+        common.setPreferences("nameUser", responseClient.user.name);
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Home()),
+        );
+      });
     });
   }
 }

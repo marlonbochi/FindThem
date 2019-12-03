@@ -16,9 +16,12 @@ class Request {
   String state;
   String address;
   String numberAddress;
+  String complementAddress;
+  String neighborhoodAddress;
   String city;
   double latitude;
   double longitude;
+  String status;
 
   Request(
       this.id,
@@ -29,12 +32,15 @@ class Request {
       this.dateEnd,
       this.description,
       this.cep,
-      this.state,
       this.address,
       this.numberAddress,
+      this.complementAddress,
+      this.neighborhoodAddress,
+      this.state,
       this.city,
       this.latitude,
-      this.longitude
+      this.longitude,
+      this.status
       );
 
   Request.fromJson(Map<String, dynamic> json) {
@@ -49,8 +55,11 @@ class Request {
     this.state = json["state"];
     this.cep = json["cep"];
     this.numberAddress = json["numberAddress"];
+    this.complementAddress = json["complementAddress"];
+    this.neighborhoodAddress = json["neighborhoodAddress"];
     this.city = json["city"];
     this.latitude = json["latitude"];
     this.longitude = json["longitude"];
+    this.status = json["status"];
   }
 }

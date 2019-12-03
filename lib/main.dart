@@ -1,3 +1,4 @@
+import 'package:find_them/screens/request/list.dart';
 import 'package:find_them/screens/request/request.dart';
 import 'package:flutter/material.dart';
 import 'package:find_them/blocprovs/main-bloc-prov.dart';
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
           "/": (BuildContext context) => Home(),
           "/login": (BuildContext context) => Login(),
           "/request": (BuildContext context) => Request(),
+          "/listRequest": (BuildContext context) => ListRequest(),
         },
       ),
     );

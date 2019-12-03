@@ -26,4 +26,23 @@ class Common {
 
     return prefs.remove(name);
   }
+
+  Future<bool> testToken() async {
+
+    String token = await getPreferences("token");
+    String expirationToken = await getPreferences("token_expiration");
+
+    if (token == null || token.isEmpty){
+      return false;
+    } else {
+      var dateNow = new DateTime.now();
+      var dateExpiration = DateTime.parse(expirationToken);
+
+      if (dateExpiration.isBefore(dateNow)) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+  }
 }
