@@ -1,10 +1,13 @@
 import 'dart:convert';
 
+import 'package:find_them/models/contact.dart';
 import 'package:find_them/screens/home/home.dart';
 import 'package:find_them/screens/login/login.dart';
+import 'package:find_them/screens/rate/rate.dart';
 import 'package:find_them/services/common.dart';
 import 'package:find_them/services/requestService.dart';
 import 'package:flutter/material.dart';
+import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 class ListRequest extends StatefulWidget {
 
@@ -52,7 +55,13 @@ class _ListRequestState extends State<ListRequest> {
 
                           Navigator.push(context, MaterialPageRoute<Null>(
                               builder: (BuildContext context) {
-                                return Rate(token: token, requestID: request.id);
+                                return Rate(
+                                    token: token,
+                                    requestID: request.id,
+                                    clientID: request.client.id,
+                                    providerID: request.provider.id,
+                                    providerName: request.provider.name,
+                                    serviceName: request.service.name);
                               },
                               fullscreenDialog: true,
                           ));
@@ -150,31 +159,6 @@ class _ListRequestState extends State<ListRequest> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class Rate extends StatelessWidget {
-  final int requestID;
-  final String token;
-
-  const Rate({Key key, this.token, this.requestID}): super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-            title: Text("Avaliar"),
-            actions: <Widget>[
-              new IconButton(
-                icon: new Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(null),
-              ),
-            ],
-          ),
-          body: Text("RATE"),
-        )
     );
   }
 }

@@ -18,7 +18,7 @@ class RequestService {
           )
       );
 
-      if (response.data.sucess) {
+      if (response.data["success"]) {
         return true;
       } else {
         return false;
